@@ -1,15 +1,14 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecure.h>
 #include <UniversalTelegramBot.h>
-#include <EEPROM.h>
 #include <ESP8266Ping.h>
 #include <ArduinoJson.h>
 #include <ESP8266HTTPClient.h>
 
-#define teleToken "6589969405:AAFtzJMenzHnxfef0BiyI_0g1sfHbCczCJk"
+#define teleToken "6479367038:AAGnAfEmoE7bUxEsT5FsTanmRveFn9nB9hE"
 #define devUser_id "1947379525"
 #define device_pass "kerajinangentong"
-IPAddress ip (192, 168, 1, 1);
+IPAddress ip (192, 168, 1, 2);
 
 String userID_List[8];
 String waitingPass[8];
@@ -22,8 +21,8 @@ unsigned long ngrokCheck;
 WiFiClientSecure client;
 UniversalTelegramBot teleBot(teleToken, client);
 
-#define def_ssid "Rizky Lamp"
-#define def_ssidPass "#gemini#"
+#define def_ssid "BCT E2"
+#define def_ssidPass "kosonginaja"
 
 String ssidList[1] = {"DBali"};
 String ssidPassList[1] = {"dbali5386"};
@@ -39,8 +38,6 @@ void setup() {
   digitalWrite(relay_pin, HIGH);
   WiFi.mode(WIFI_STA);
   trySSID();
-  EEPROM.begin(512);
-  loadWhitelist();
   urlRemote = ngrokURL("3389");
   urlSSH = ngrokURL("22");
 }
@@ -63,7 +60,7 @@ void loop() {
   if(millis() - ngrokCheck >= 1800000){
     urlRemote = ngrokURL("3389");
     urlSSH = ngrokURL("22");
-    ngrokCheck == millis();
+    ngrokCheck = millis();
   }
 }
 void connectWIFI(String ssid, String pass){
@@ -118,7 +115,7 @@ void handleNewMSG(int numNewUpdate){
       teleBot.sendMessage(user_id, "Now you have control to the bot");
       teleBot.sendMessage(devUser_id, "Now "+user_id+"("+name+") "+"have control to the bot");
     }
-    if(msg == "/rl_press" && userAuth(user_id)){
+    if(msg == "/press" && userAuth(user_id)){
       broadcast("Someone try to pressing RL PC Power Button", user_id, name);
       teleBot.sendMessage(user_id, "You try to pressing RL PC Power Button");
       Serial.println("RL PC Power pressed");
@@ -126,7 +123,7 @@ void handleNewMSG(int numNewUpdate){
       delay(500);
       digitalWrite(relay_pin, HIGH);
     }
-    if(msg == "/rl_long_press" && userAuth(user_id)){
+    if(msg == "/long_press" && userAuth(user_id)){
       Serial.println("Creating Keyboard Json for inline Keyboard");
       addArr(waitingConfirmLongPress, sizeof(waitingConfirmLongPress) / sizeof(waitingConfirmLongPress[0]), user_id, "waitingConfirmLongPress");
       Serial.println("send mesaage with inline keyboard");
@@ -147,18 +144,18 @@ void handleNewMSG(int numNewUpdate){
       broadcast("Forced shutdown undone", user_id, name);
       removeArr(waitingConfirmLongPress, sizeof(waitingConfirmLongPress) / sizeof(waitingConfirmLongPress[0]), user_id, "waitingConfirmLongPress");
     }
-    if(msg == "/rl_ping" && userAuth(user_id)){
+    if(msg == "/ping" && userAuth(user_id)){
       if(Ping.ping(ip)){
         teleBot.sendMessage(user_id, "The PC is connected to" + WiFi.SSID());
       } else {
         teleBot.sendMessage(user_id, "The PC is not connected or power off");
       }
     }
-    if(msg == "/rl_remote" && userAuth(user_id)){
+    if(msg == "/remote" && userAuth(user_id)){
       teleBot.sendMessage(user_id, "Remote RL URL : "+urlRemote);
       Serial.println(user_id + " Mengambil url ngrok untuk 3389");
     }
-    if(msg == "/rl_ssh" && userAuth(user_id)){
+    if(msg == "/ssh" && userAuth(user_id)){
       teleBot.sendMessage(user_id, "RL SSH URL : "+urlSSH);
       Serial.println(user_id + " Mengambil url ngrok untuk 22");
     }
@@ -167,9 +164,9 @@ void handleNewMSG(int numNewUpdate){
       urlSSH= ngrokURL("22");
       teleBot.sendMessage(user_id, "Ngrok URL refreshed");
     }
-    if(msg == "/user_list" && devUser_id){
-      printUserIDListToSerial();
-    }
+    // if(msg == "/user_list" && devUser_id){
+    //   printUserIDListToSerial();
+    // }
     if(msg == "/my_id"){
       Serial.println("your ID : "+user_id);
     }
@@ -230,59 +227,13 @@ void broadcast(String msg, String trig_User_id, String trigByName){
   }
   Serial.println("Broadcast send to whitelisted");
 }
-// void loadWhitelist(){
-//   Serial.println("Memuat Whitelist");
-//   for (int i = 0; i < 7; i++) {
-//     userID_List[i] = readEEPROM(i * 15);  // Misalkan setiap string maksimal 15 karakter
-//     if (userID_List[i] != "") {
-//       numWhitelist++;
-//     }
-//   }
-// }
-// void saveToWhitelist(String user_id){
-//   Serial.println("Menyimpan ke dalam whitelist");
-//   if(numWhitelist < 8){
-//     userID_List[numWhitelist] = user_id;
-//     writeEEPROM(numWhitelist * 15, user_id);
-//     numWhitelist++;
-//     Serial.println("Sudah tersimpan ke dalam whitelist");
-//   } else {
-//     Serial.println("Array sudah penuh!");
-//   }
-// }
-// void writeEEPROM(int addr, String value) {
-//   if(value.length() > 14) {  
-//     value = value.substring(0, 14);
-//   }
-  
-//   char charBuf[15];  // Buat buffer karakter dengan panjang maksimum 15
-//   value.toCharArray(charBuf, 15); // Konversi String ke char array
-//   EEPROM.put(addr, charBuf);
-//   EEPROM.commit();
-// }
-// String readEEPROM(int addr) {
-//   char charBuf[15] = {0};  // Inisialisasi buffer karakter dengan nilai 0
-//   EEPROM.get(addr, charBuf);
-//   String value = String(charBuf);  // Konversi kembali ke String
-//   return value;
-// }
-void printUserIDListToSerial() {
-  Serial.println("----- User ID List -----");
-  for (int i = 0; i < sizeof(userID_List) / sizeof(userID_List[0]); i++) {
-    Serial.print("Index ");
-    Serial.print(i);
-    Serial.print(": ");
-    Serial.println(userID_List[i]);
-  }
-  Serial.println("------------------------");
-}
 String ngrokURL(String port) {
   HTTPClient http; // Mendeklarasikan di sini, bukan di level global
 
   Serial.println("Try getting url for "+port);
   http.begin(client, "https://api.ngrok.com/tunnels");
   http.addHeader("Content-Type", "application/json");
-  http.addHeader("authorization", "Bearer 2LIu6cBDxNMEcDccIuYjUXxS45g_4f7VqLLGqnX4cPp7mcxKT");
+  http.addHeader("authorization", "Bearer 2LJSWpR99nzr96QSspKZPJHUwBt_78xmyb9xJunjTtorAWYgU");
   http.addHeader("ngrok-version", "2");
 
   int httpResponseCode = http.GET();
