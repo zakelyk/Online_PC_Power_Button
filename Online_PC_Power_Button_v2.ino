@@ -164,9 +164,9 @@ void handleNewMSG(int numNewUpdate){
       urlSSH= ngrokURL("22");
       teleBot.sendMessage(user_id, "Ngrok URL refreshed");
     }
-    // if(msg == "/user_list" && devUser_id){
-    //   printUserIDListToSerial();
-    // }
+    if(msg == "/user_list" && devUser_id){
+      printUserIDListToSerial();
+    }
     if(msg == "/my_id"){
       Serial.println("your ID : "+user_id);
     }
@@ -263,4 +263,14 @@ String ngrokURL(String port) {
   http.end();
   Serial.println("Get url error/failed");
   return "";
+}
+void printUserIDListToSerial() {
+  Serial.println("----- User ID List -----");
+  for (int i = 0; i < sizeof(userID_List) / sizeof(userID_List[0]); i++) {
+    Serial.print("Index ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.println(userID_List[i]);
+  }
+  Serial.println("------------------------");
 }
