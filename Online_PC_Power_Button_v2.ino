@@ -169,6 +169,7 @@ void handleNewMSG(int numNewUpdate){
     }
     if(msg == "/my_id"){
       Serial.println("your ID : "+user_id);
+      teleBot.sendMessage(user_id, "your ID : "+user_id);
     }
   }
 }
