@@ -8,7 +8,8 @@
 #define teleToken "6479367038:AAGnAfEmoE7bUxEsT5FsTanmRveFn9nB9hE"
 #define devUser_id "1947379525"
 #define device_pass "kerajinangentong"
-IPAddress ip (192, 168, 1, 2);
+// IPAddress ip (192, 168, 1, 15);
+const char* host = "unknown";
 
 String userID_List[8];
 String waitingPass[8];
@@ -145,7 +146,7 @@ void handleNewMSG(int numNewUpdate){
       removeArr(waitingConfirmLongPress, sizeof(waitingConfirmLongPress) / sizeof(waitingConfirmLongPress[0]), user_id, "waitingConfirmLongPress");
     }
     if(msg == "/ping" && userAuth(user_id)){
-      if(Ping.ping(ip)){
+      if(Ping.ping(host)){
         teleBot.sendMessage(user_id, "The PC is connected to" + WiFi.SSID());
       } else {
         teleBot.sendMessage(user_id, "The PC is not connected or power off");
