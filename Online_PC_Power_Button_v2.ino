@@ -5,11 +5,15 @@
 #include <ArduinoJson.h>
 #include <ESP8266HTTPClient.h>
 
-#define teleToken "6479367038:AAGnAfEmoE7bUxEsT5FsTanmRveFn9nB9hE"
-#define devUser_id "1947379525"
-#define device_pass "kerajinangentong"
-// IPAddress ip (192, 168, 1, 15);
-const char* host = "unknown";
+#define teleToken "YOUR_BOT_TOKEN"
+#define ngrokApi "YOUR_NGROK_API_KEY"
+#define rdpPort "3389"
+#define sshPort "22"
+#define ngrokVersion "2"
+
+#define devUser_id "YOUR_TELEGRAM_USER_ID"
+#define device_pass "DEVICE_PASSWORD"
+const char* host = "PC_NAME";
 
 String userID_List[8];
 String waitingPass[8];
@@ -22,15 +26,15 @@ unsigned long ngrokCheck;
 WiFiClientSecure client;
 UniversalTelegramBot teleBot(teleToken, client);
 
-#define def_ssid "BCT E2"
-#define def_ssidPass "kosonginaja"
+#define def_ssid "YOUR_SSID"
+#define def_ssidPass "YOUR_SSID_PASSWORD"
 
-String ssidList[1] = {"DBali"};
-String ssidPassList[1] = {"dbali5386"};
+String ssidList[1] = {"ALTERNATIF_SSID"};
+String ssidPassList[1] = {"ALT_SSID_PASSWORD"};
 unsigned long lastConnect, lastCheck;
 int numNewUpdate = 0, numWhitelist = 0;
 
-#define relay_pin D2
+#define relay_pin D2 //define relay pin
 
 void setup() {
   Serial.begin(9600);
@@ -39,8 +43,8 @@ void setup() {
   digitalWrite(relay_pin, HIGH);
   WiFi.mode(WIFI_STA);
   trySSID();
-  urlRemote = ngrokURL("3389");
-  urlSSH = ngrokURL("22");
+  urlRemote = ngrokURL(rdpPort);
+  urlSSH = ngrokURL(sshPort);
 }
 void loop() {
   digitalWrite(relay_pin, HIGH);
@@ -108,9 +112,7 @@ void handleNewMSG(int numNewUpdate){
       addArr(waitingPass, sizeof(waitingPass) / sizeof(waitingPass[0]), user_id, "waitingPass");
     }
     if(msg == device_pass && !userAuth(user_id) && isAnyOnArray(waitingPass, sizeof(waitingPass) / sizeof(waitingPass[0]), user_id, "waitingPass")){
-      //add user_id to userID_List
       addArr(userID_List, sizeof(userID_List)/ sizeof(userID_List[0]), user_id, "userID_List");
-      // saveToWhitelist(user_id);
       Serial.println(user_id + " Added to userID_List/whitelist!!!");
       removeArr(waitingPass, sizeof(waitingPass) / sizeof(waitingPass[0]), user_id, "waitingPass");
       teleBot.sendMessage(user_id, "Now you have control to the bot");
@@ -235,8 +237,8 @@ String ngrokURL(String port) {
   Serial.println("Try getting url for "+port);
   http.begin(client, "https://api.ngrok.com/tunnels");
   http.addHeader("Content-Type", "application/json");
-  http.addHeader("authorization", "Bearer 2LJSWpR99nzr96QSspKZPJHUwBt_78xmyb9xJunjTtorAWYgU");
-  http.addHeader("ngrok-version", "2");
+  http.addHeader("authorization", "Bearer "+ngrokApi);
+  http.addHeader("ngrok-version", ngrokVersion");
 
   int httpResponseCode = http.GET();
 
